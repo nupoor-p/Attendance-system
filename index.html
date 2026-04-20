@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaceAttend Pro - Smart Face Recognition Attendance</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 24px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ff4444;
+        }
+
+        .status-dot.connected {
+            background: #44ff44;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        textarea {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #status-messages {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #eee;
+        }
+
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            border-left: 4px solid #667eea;
+            background: #f0f4ff;
+        }
+
+        .message.success {
+            border-left-color: #44ff44;
+            background: #f0fff0;
+            color: #22aa22;
+        }
+
+        .message.error {
+            border-left-color: #ff4444;
+            background: #fff0f0;
+            color: #dd0000;
+        }
+
+        .message.info {
+            border-left-color: #4488ff;
+            background: #f0f8ff;
+            color: #0044cc;
+        }
+
+        .attendance-log {
+            list-style: none;
+        }
+
+        .attendance-item {
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .attendance-item .name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .attendance-item .time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box .value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .stat-box .label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .enrollment-section {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px dashed #667eea;
+            margin-top: 20px;
+        }
+
+        .enrollment-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 FaceAttend Pro</h1>
+            <div class="status-badge">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Disconnected</span>
+            </div>
+        </div>
+
+        <!-- Registration Card -->
+        <div class="card">
+            <h2>📝 Register New Face</h2>
+            <p style="color: #999; font-size: 14px; margin-bottom: 20px;">When a new face is detected, you can register them here.</p>
+            
+            <div class="enrollment-section" id="enrollmentSection" style="display: none;">
+                <h3>New Face Detected!</h3>
+                <p style="margin-bottom: 15px; color: #667eea;">Please enter the person's details to register them.</p>
+                
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" placeholder="Enter full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="studentId">Student ID (Optional)</label>
+                    <input type="text" id="studentId" placeholder="Enter student ID">
+                </div>
+
+                <button onclick="registerPerson()" style="width: 100%;">✓ Register Person</button>
+                <button onclick="skipEnrollment()" style="width: 100%; background: #999; margin-top: 10px;">✗ Skip</button>
+            </div>
+
+            <div id="noEnrollment" style="text-align: center; color: #999; padding: 40px 20px;">
+                <p style="font-size: 18px;">👤 Waiting for face detection...</p>
+            </div>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="value" id="totalRegistered">0</div>
+                    <div class="label">Registered Faces</div>
+                </div>
+                <div class="stat-box">
+                    <div class="value" id="totalAttendance">0</div>
+                    <div class="label">Today's Attendance</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status & Messages Card -->
+        <div class="card">
+            <h2>📊 Live Status</h2>
+            <div style="margin-bottom: 20px;">
+                <strong>Backend Status:</strong>
+                <div id="backendStatus" style="padding: 10px; background: #fff0f0; border-radius: 5px; margin-top: 10px; color: #dd0000;">
+                    <span class="spinner"></span> Checking...
+                </div>
+            </div>
+
+            <h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px; font-size: 16px;">Recent Events</h3>
+            <div id="status-messages"></div>
+        </div>
+
+        <!-- Attendance Log Card -->
+        <div class="card" style="grid-column: 1 / -1;">
+            <h2>📋 Attendance Log</h2>
+            <ul class="attendance-log" id="attendanceLog">
+                <li class="attendance-item" style="text-align: center; color: #999;">
+                    No attendance records yet
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        // Initialize Socket.IO connection
+        const socket = io();
+        let isConnected = false;
+        let pendingEmbedding = null;
+
+        // Connection events
+        socket.on('connect', () => {
+            console.log('[UI] Connected to server');
+            isConnected = true;
+            updateConnectionStatus(true);
+            addMessage('Connected to FaceAttend Pro server', 'success');
+            checkBackendStatus();
+        });
+
+        socket.on('disconnect', () => {
+            console.log('[UI] Disconnected from server');
+            isConnected = false;
+            updateConnectionStatus(false);
+            addMessage('Disconnected from server', 'error');
+        });
+
+        socket.on('pong', () => {
+            console.log('[UI] Pong received');
+        });
+
+        // Enrollment trigger from Python backend
+        socket.on('enrollment_needed', (data) => {
+            console.log('[UI] Enrollment needed:', data);
+            pendingEmbedding = data.embedding;
+            document.getElementById('enrollmentSection').style.display = 'block';
+            document.getElementById('noEnrollment').style.display = 'none';
+            addMessage(`New face detected! Please register ${data.name || 'this person'}`, 'info');
+        });
+
+        // Attendance logged
+        socket.on('attendance_logged', (data) => {
+            console.log('[UI] Attendance logged:', data);
+            addAttendanceLog(data.name, data.timestamp);
+            addMessage(`✓ ${data.name} marked present`, 'success');
+            updateAttendanceCount();
+        });
+
+        // Notification
+        socket.on('notification', (data) => {
+            console.log('[UI] Notification:', data);
+            addMessage(data.message, 'success');
+        });
+
+        // Error handling
+        socket.on('register_error', (data) => {
+            console.error('[UI] Registration error:', data);
+            addMessage(`❌ Registration failed: ${data.error}`, 'error');
+        });
+
+        socket.on('attendance_error', (data) => {
+            console.error('[UI] Attendance error:', data);
+            addMessage(`❌ Error: ${data.error}`, 'error');
+        });
+
+        // Helper functions
+        function updateConnectionStatus(connected) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            
+            if (connected) {
+                dot.classList.add('connected');
+                text.textContent = 'Connected';
+            } else {
+                dot.classList.remove('connected');
+                text.textContent = 'Disconnected';
+            }
+        }
+
+        function addMessage(message, type = 'info') {
+            const messagesDiv = document.getElementById('status-messages');
+            const msgElement = document.createElement('div');
+            msgElement.className = `message ${type}`;
+            msgElement.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            messagesDiv.appendChild(msgElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            // Keep only last 20 messages
+            const messages = messagesDiv.querySelectorAll('.message');
+            if (messages.length > 20) {
+                messages[0].remove();
+            }
+        }
+
+        function registerPerson() {
+            const name = document.getElementById('fullName').value.trim();
+            const studentId = document.getElementById('studentId').value.trim();
+
+            if (!name) {
+                alert('Please enter a name');
+                return;
+            }
+
+            if (!isConnected) {
+                addMessage('❌ Not connected to server', 'error');
+                return;
+            }
+
+            socket.emit('register', {
+                name: name,
+                student_id: studentId || null,
+                embedding: pendingEmbedding
+            });
+
+            // Reset form
+            document.getElementById('fullName').value = '';
+            document.getElementById('studentId').value = '';
+            document.getElementById('enrollmentSection').style.display = 'none';
+            document.getElementById('noEnrollment').style.display = 'block';
+            
+            addMessage(`Registering ${name}...`, 'info');
+        }
+
+        function skipEnrollment() {
+            document.getElementById('enrollmentSection').style.display = 'none';
+            document.getElementById('noEnrollment').style.display = 'block';
+            pendingEmbedding = null;
+            addMessage('Enrollment skipped', 'info');
+        }
+
+        function addAttendanceLog(name, timestamp) {
+            const log = document.getElementById('attendanceLog');
+            
+            // Remove "no records" message if it exists
+            if (log.children.length === 1 && log.children[0].textContent.includes('No attendance')) {
+                log.innerHTML = '';
+            }
+
+            const item = document.createElement('li');
+            item.className = 'attendance-item';
+            item.innerHTML = `
+                <span class="name">✓ ${name}</span>
+                <span class="time">${new Date(timestamp).toLocaleTimeString()}</span>
+            `;
+            log.insertBefore(item, log.firstChild);
+
+            // Keep only last 50 records
+            while (log.children.length > 50) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        function updateAttendanceCount() {
+            const count = document.getElementById('attendanceLog').children.length;
+            document.getElementById('totalAttendance').textContent = count;
+        }
+
+        function checkBackendStatus() {
+            fetch('http://localhost:5001/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    const statusDiv = document.getElementById('backendStatus');
+                    statusDiv.innerHTML = '<strong style="color: #22aa22;">✓ Backend running</strong>';
+                    statusDiv.style.background = '#f0fff0';
+                    statusDiv.style.color = '#22aa22';
+                })
+                .catch(error => {
+                    const statusDiv = document.getElementById('backendStatus');
+                    statusDiv.innerHTML = '<strong style="color: #dd0000;">✗ Backend offline</strong>';
+                    statusDiv.style.background = '#fff0f0';
+                    statusDiv.style.color = '#dd0000';
+                    console.log('[UI] Backend check failed:', error.message);
+                });
+        }
+
+        // Check backend status every 5 seconds
+        setInterval(checkBackendStatus, 5000);
+
+        // Initial status message
+        addMessage('FaceAttend Pro initialized', 'success');
+        addMessage('Waiting for Python backend to connect...', 'info');
+    </script>
+</body>
+</html>
