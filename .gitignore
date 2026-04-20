@@ -1,0 +1,100 @@
+# ============================================================
+# .gitignore — Exclude files from Git version control
+# ============================================================
+
+# ── ENVIRONMENT & SECRETS ──────────────────────────────────
+.env                          # Supabase API keys (SECRET!)
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# ── PYTHON VIRTUAL ENVIRONMENTS ───────────────────────────
+.venv/
+venv/
+ENV/
+env/
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ── PYTHON CACHE & COMPILED ────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.o
+*.c
+*.cpp
+
+# ── IDE & EDITOR ────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-project
+*.sublime-workspace
+
+# ── NODE & JAVASCRIPT ──────────────────────────────────────
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm/
+
+# ── SENSITIVE DATA & PRIVACY ───────────────────────────────
+data/attendance.csv           # Student attendance records (PRIVACY!)
+data/snapshots/               # Student enrollment photos (PRIVACY!)
+data/student_records.csv      # Student data (PRIVACY!)
+*.sqlite
+*.db
+*.sqlite3
+
+# ── TEMPORARY & OS FILES ───────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+*.swp
+*.swo
+*~
+Thumbs.db
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ── LOGS & RUNTIME ────────────────────────────────────────
+*.log
+logs/
+tmp/
+temp/
+*.pid
+
+# ── BUILD & DISTRIBUTION ──────────────────────────────────
+build/
+dist/
+*.whl
+*.tar.gz
+*.zip
+
+# ── MISCELLANEOUS ─────────────────────────────────────────
+.vscode-settings.json
+*.env.example          # Keep this as reference (no secrets)
